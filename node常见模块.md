@@ -300,3 +300,136 @@ emitter.prependOnceListener('loaded', () => {})
 emitter.removeAllListeners(['success', 'error'])
 ```
 
+# buffer存储模块
+
+- 对于服务器端来说，为了做更多的功能，有时候必须直接去操作其二进制的数据
+- `Node` 提供了全局的 `Buffer` 类，方便开发者完成更多功能
+- `Buffer` 可以看成存储二进制的数组，每一项保存**8位二进制(一个字节)**
+
+## 与字符串的转换
+
+- `Buffer` 相当于是一个字节的数组，数组中的每一项对应一个字节的大小
+
+> **将一个字符串放入到 `Buffer` 的过程**
+
+```javascript
+const buffer = Buffer.from('Hello');
+
+console.log(buffer); // <Buffer 48 65 6c 6c 6f>
+```
+
+- ①先将字符串通过 `ascii` 编码，转换成对应的16进制，如 `H -> 48`
+- ②然后将16进制存储到 `Buffer` 中，每个16进制可以转换成8位的二进制，相当于一个字节
+
+> **存储中文字符串**
+
+- 每个中文需要3个字节存储，默认编码为 `uft-8`
+
+```javascript
+const buffer = Buffer.from('你好');
+
+console.log(buffer); // <Buffer e4 bd a0 e5 a5 bd>
+```
+
+> **如果编码和解码格式不一致**
+
+```javascript
+const buffer3 = Buffer.from('你好', 'utf16le');
+
+console.log(buffer3.toString('utf-8')); // 出现乱码
+```
+
+## 其他创建方式
+
+![1690709676448](images/1690709676448.png)
+
+- `Buffer.alloc()` 创建buffer，用于向操作系统申请内存空间
+
+```javascript
+// 向操作系统申请8个字节大小的内存空间
+const buffer = Buffer.alloc(8);
+console.log(buffer); // <Buffer 00 00 00 00 00 00 00 00>
+
+// 手动对每个字节进行操作
+buffer[0] = 100;
+buffer[1] = 0x66;
+console.log(buffer); // <Buffer 64 66 00 00 00 00 00 00>
+```
+
+## 文件操作
+
+- 读取文件时不指定编码格式，默认是 `Buffer`，可以对读取的数据进行更改
+
+```javascript
+const fs = require('fs');
+
+// 从文件中读取buffer
+fs.readFile('./aaa.txt', (err, data) => {
+  if (err) return;
+  console.log('读取结果：', data.toString()); // 读取结果： 你好啊
+  data[0] = 0xe5;
+  data[1] = 0x95;
+  data[2] = 0x8a;
+  console.log('读取结果：', data.toString()); // 读取结果： 啊好啊
+});
+```
+
+# path路径模块
+
+- path模块是 `Node` 提供用于处理路径，它包含一系列的方法和属性，满足开发者对路径的处理需求
+
+```javascript
+const path = require('path');
+```
+
+## 路径拼接
+
+- 使用 `path.join()` 进行路径拼接，该方法将参数拼接为一个路径字符串，并返回拼接后的路径 
+
+```javascript
+const pathStr = path.join('/a', '/b/c', '../', '/d', 'e');
+
+console.log(pathStr); // \a\b\d\e
+// 这里拼接时使用“../”, 会抵消前面的路径
+```
+
+- 使用 `__dirname` 获取当前工作路径
+
+```javascript
+const pathStr = path.join(__dirname, '/files/aaa.txt');
+
+console.log(pathStr); // E:\FrontEnd-Study\nodejs\node模块-path路径\files\aaa.txt
+```
+
+## 路径解析
+
+- 使用 `path.resolve` 方法将参数解析为绝对路径，并返回解析后的路径字符串
+- 该方法以当前工作目录为基准，根据传入的路径参数解析出一个绝对路径 
+
+```javascript
+const pathStr2 = path.resolve(__dirname, 'files/1.txt');
+
+console.log(pathStr2); // E:\FrontEnd-Study\nodejs\node模块-path路径\files\1.txt
+```
+
+## 文件名/扩展名获取
+
+- 使用 `path.basename()` 方法获取路径中的最后一部分，通过该方法获取路径中的文件名
+
+```javascript
+// 获取文件全名
+const fullName = path.basename('/aa/bb/cc/index.js');
+// 去除扩展名
+const fileName = path.basename('/aa/bb/cc/index.js', '.js');
+
+console.log(fullName); // index.js
+console.log(fileName); // index
+```
+
+- 使用 `path.extname()` 方法获取路径中的扩展名
+
+```javascript
+const extName = path.extname('/aa/bb/cc/index.js');
+
+console.log(extName); // .js
+```
