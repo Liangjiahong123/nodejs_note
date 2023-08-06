@@ -185,12 +185,12 @@ app.get(
 );
 ```
 
-# 内置中间件
+## 内置中间件
 
 - `express` 框架提供了一些现成的中间件，可以用于对 `request` 对象进行解析
 - `registry` 仓库中也有很多可以辅助开发使用的中间件
 
-## json()
+### json()
 
 - 使用 `express.json()` 中间件，对客户端传递的 `JSON` 格式数据作解析，并添加到 `req.body` 中
 
@@ -224,7 +224,7 @@ app.use((req, res, next) => {
 });
 ```
 
-## urlencoded()
+### urlencoded()
 
 - 使用`express.urlencode()` 解析客户端携带的 `urlencoded` 格式的数据，并添加到 `req.body` 中
 
@@ -245,3 +245,134 @@ app.post('/login', (req, res, next) => {
 
 - 由于 `urlencode` 默认使用 `node` 内置的 `querystring` 模块解析，但 `querystring` 模块已不推荐使用
 - 声明 `extended` 为 `true`时，内部会使用第三方库 `qs`
+
+## 第三方中间件
+
+- `express` 框架除了内置一些中间件外，还有其官方开发的第三方库
+
+### morgan()
+
+- 使用第三方库 `morgan`，用于将请求日志记录下来
+
+```shell
+# 安装morgan
+npm i morgan
+```
+
+- 导入第三方库，应用该中间件写入请求日志
+
+```javascript
+const express = require('express');
+const morgan = require('morgan');
+const fs = require('fs');
+
+const app = express();
+
+const writeStream = fs.createWriteStream('./logs/access.log');
+// 应用第三方中间件
+app.use(morgan('combined', { stream: writeStream }));
+
+app.post('/login', (req, res, next) => {
+  res.end('登录成功~');
+});
+```
+
+![1691349622034](images/1691349622034.png)
+
+### multer
+
+- 使用第三方中间件 `multer` 可以实现单文件上传
+
+```shell
+# 安装multer
+npm i multer
+```
+
+- 导入 `multer` 并使用
+
+```javascript
+const express = require('express');
+const multer = require('multer');
+
+const app = express();
+
+// 调用multer，返回一个对象
+const upload = multer({
+  dest: './upload' // 上传文件的放置目录
+});
+```
+
+- 使用 `upload` 对象的 `single` 中间件，对上传的文件进行解析，并添加到 `req.file` 中
+
+```javascript
+app.post('/upload', upload.single('avatar'), (req, res, next) => {
+  // 获取上传文件的信息
+  console.log(req.file);
+  res.end('文件上传成功~');
+});
+```
+
+> **注意：使用 `dest` 声明保存文件的目录，会导致文件没有后缀名，进而使得文件出现异常**
+
+- **解决：**使用 `multer.diskStorage()` 方法，确定文件的存放路径，并自定义文件名称
+
+```javascript
+const upload = multer({
+  storage: multer.diskStorage({
+    // 文件保存路径
+    destination(req, file, cb) {
+      cb(null, './uploads'); // 需保证目标文件夹存在
+    },
+    // 文件自定义名称
+    filename(req, file, cb) {
+      cb(null, Date.now() + '_' + file.originalname);
+    }
+  })
+});
+```
+
+> **如何接收客户端上传多个文件？**
+
+- 使用 `upload` 对象的 `array` 中间件，对上传的多个文件解析，并添加到 `req.files` 中
+
+```javascript
+app.post('/photos', upload.array('photos'), (req, res, next) => {
+  // 获取上传文件的信息
+  console.log(req.files);
+  res.end('文件上传成功~');
+});
+```
+
+## 其他参数类型解析
+
+- `body` 携带的参数和 `form-data` 携带的文件都有对应的中间件解析，但获取 `query` 和 `params` 参数不需要使用中间件
+- `express` 框架内部已经将 `query` 和 `params` 参数，存放于 `request` 对象中
+
+```javascript
+app.get('/home/list', (req, res, next) => {
+  // 获取query参数
+  console.log(req.query); // { offset: '1', size: '10' }
+  res.end('home list数据');
+});
+
+app.get('/users/:id', (req, res, next) => {
+  // 获取pramas参数
+  console.log(req.params); // { id: '123' }
+  res.end('user数据');
+});
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
