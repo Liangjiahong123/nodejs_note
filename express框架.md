@@ -431,39 +431,70 @@ userRouter.patch('/update', (req, res, next) => {
 app.use('/users', userRouter);
 ```
 
-# 静态资源
+# 静态资源部署
+
+- `Node` 也可以作为静态资源服务器，并且 `express` 提供了方便部署静态资源的方法
+- 使用 `express` 内置的 `static` 中间件，可以将图片、前端项目等部署
+
+```javascript
+const express = require('express');
+
+const app = express();
+
+// 将uploads下的静态资源部署
+app.use(express.static('./uploads'));
+
+app.listen(8888, () => {
+  console.log('express服务器启动成功');
+});
+
+```
+
+- 然后可以通过浏览器访问部署好的资源
+
+![1691431929987](images/1691431929987.png)
+
+# 错误处理
+
+- 如果客户端携带的数据不符合要求，服务端需要进行错误处理，然后将对应的错误信息响应到客户端
+
+> **服务端处理错误信息有两种方案：**
+
+- 直接通过 `res.status()` 修改 http 状态码，然后返回对应的错误信息
+
+```javascript
+res.status(401).end('登录过期')
+```
+
+- 不修改 http 状态码，而是自定义一套状态码，告知客户端某个状态码对应的错误
+
+```javascript
+app.use(express.json());
 
 
+app.post('/login', (req, res, next) => {
+  const { username, password } = req.body;
+  // 对登录信息拦截，进行错误处理
+  if (!username || !password) {
+    next(-1001); // 通过next()调用错误处理的中间件，并且传递参数
+  } else if (username !== 'Jimmy' || password !== '123456') {
+    next(-1002);
+  } else {
+    res.json({ message: '登录成功~', code: 0, token: 'sadafagwq' });
+  }
+});
 
+// 错误处理的中间件，这里包含四个参数
+// 其中第一个参数是上一个中间件调用next()后传递的
+app.use((errCode, req, res, next) => {
+  const message = new Map([
+    [-1001, '用户名或密码不能为空'],
+    [-1002, '用户名或密码错误'],
+    [0, '登录成功~']
+  ]).get(errCode);
 
+  res.json({ message, code: errCode });
+});
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![1691433496931](images/1691433496931.png)
