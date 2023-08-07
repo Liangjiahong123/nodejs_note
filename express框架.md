@@ -117,7 +117,7 @@ app.use(() => {
 - 当匹配到第一个符合要求的中问件时，那么就会执行这个中间件
 - 后续的中间件是否执行取决于上一个中间件是否调用 `next()`
 
-> **`express` 提供了两种方式将中间件注册到应用程序中**，这种注册到 `app` 上的中间件称为应用中间件
+> **`express` 提供了两种方式将中间件注册到应用程序中**，这种注册到 `app` 上的中间件称为应用级别中间件
 
 - **app.use()：**通过该方法注册的中间件，任何请求方式都可以匹配
 
@@ -185,12 +185,12 @@ app.get(
 );
 ```
 
-## 内置中间件
+# 内置中间件
 
 - `express` 框架提供了一些现成的中间件，可以用于对 `request` 对象进行解析
 - `registry` 仓库中也有很多可以辅助开发使用的中间件
 
-### json()
+## json()
 
 - 使用 `express.json()` 中间件，对客户端传递的 `JSON` 格式数据作解析，并添加到 `req.body` 中
 
@@ -224,7 +224,7 @@ app.use((req, res, next) => {
 });
 ```
 
-### urlencoded()
+## urlencoded()
 
 - 使用`express.urlencode()` 解析客户端携带的 `urlencoded` 格式的数据，并添加到 `req.body` 中
 
@@ -246,11 +246,11 @@ app.post('/login', (req, res, next) => {
 - 由于 `urlencode` 默认使用 `node` 内置的 `querystring` 模块解析，但 `querystring` 模块已不推荐使用
 - 声明 `extended` 为 `true`时，内部会使用第三方库 `qs`
 
-## 第三方中间件
+# 第三方中间件
 
 - `express` 框架除了内置一些中间件外，还有其官方开发的第三方库
 
-### morgan()
+## morgan()
 
 - 使用第三方库 `morgan`，用于将请求日志记录下来
 
@@ -279,7 +279,7 @@ app.post('/login', (req, res, next) => {
 
 ![1691349622034](images/1691349622034.png)
 
-### multer
+## multer()
 
 - 使用第三方中间件 `multer` 可以实现单文件上传
 
@@ -343,7 +343,7 @@ app.post('/photos', upload.array('photos'), (req, res, next) => {
 });
 ```
 
-## 其他参数类型解析
+# 其他参数类型解析
 
 - `body` 携带的参数和 `form-data` 携带的文件都有对应的中间件解析，但获取 `query` 和 `params` 参数不需要使用中间件
 - `express` 框架内部已经将 `query` 和 `params` 参数，存放于 `request` 对象中
@@ -362,17 +362,39 @@ app.get('/users/:id', (req, res, next) => {
 });
 ```
 
+# 响应数据
 
+- 响应数据通过 `response` 对象，向客户端返回需要的数据
+- 通过 `res.end()` 返回字符串，该方法类似于 `http` 模块中的 `response.end` 方法
 
+```javascript
+app.post('/login', (req, res, next) => {
+  // res.end('登录成功~');
+});
+```
 
+- 通过 `res.json` 方法，可以向客户端返回多种类型，如 `object`、`array`、`string`、`boolean`、`number`、`null` 等，都会被转换成 `json` 格式返回
 
+```javascript
+app.post('/login', (req, res, next) => {
+  res.json({ message: '登录成功', code: 200 });
+});
+```
 
+- 通过 `res.status` 方法设置 `http` 的状态码
 
+```javascript
+app.post('/login', (req, res, next) => {
+  res.status(201);
+  res.end('登录成功~');
+});
 
+// 也可以链式调用
+res.status(201).end('登录成功~');
+res.status(201).send('登录成功~');
+```
 
+- **更多响应方式：**https://www.expressjs.com.cn/4x/api.html#res
 
-
-
-
-
+# 路由系统
 
