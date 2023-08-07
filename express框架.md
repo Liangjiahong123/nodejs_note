@@ -3,12 +3,6 @@
 - `Express` 是一款在 `Node` 中比较流行的 Web 服务器框架
 - 可以基于 `Express` 快速、方便地开发自己的 Web 服务器，并且可以通过工具和中间件来扩展功能
 - `Express` 框架的核心就是中间件
-- 安装 `express` 框架
-
-```shell
-# 安装express框架
-npm install express
-```
 
 # 基本使用
 
@@ -33,7 +27,11 @@ node bin/www
 2. 从零搭建自己的 `express` 应用结构
 
 ```shell
+# 初始化
 npm init -y
+
+# 安装express框架
+npm install express
 ```
 
 > **使用 `express` 启动一个服务器**
@@ -403,7 +401,7 @@ res.status(201).send('登录成功~');
 
 > **使用 `express.Router` 创建一个路由处理程序**
 
-- 一个 `Router` 实例拥有完整的中间件和路由系统
+- 一个 `Router` 实例拥有完整的中间件和路由系统，**在路由上注册的中间件称为路由级别中间件**
 - 因此 `Router` 实例也被**称为迷你应用程序(mini-app)**
 
 ```javascript
