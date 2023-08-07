@@ -398,3 +398,72 @@ res.status(201).send('登录成功~');
 
 # 路由系统
 
+- 如果将所有代码逻辑都写在 `app` 中，那么 `app` 会变得越来越复杂，项目难以维护
+- 完整的 Web 服务器包含非常多的处理逻辑，有些处理逻辑其实是一个整体，应该将它们放在一起
+
+> **使用 `express.Router` 创建一个路由处理程序**
+
+- 一个 `Router` 实例拥有完整的中间件和路由系统
+- 因此 `Router` 实例也被**称为迷你应用程序(mini-app)**
+
+```javascript
+// 使用路由
+const userRouter = express.Router();
+
+// 将用户相关的路由注册到router中
+userRouter.get('/', (req, res, next) => {
+  res.end('用户列表');
+});
+userRouter.get('/:id', (req, res, next) => {
+  res.end('用户数据');
+});
+userRouter.post('/add', (req, res, next) => {
+  res.end('添加用户');
+});
+userRouter.delete('/del', (req, res, next) => {
+  res.end('删除用户');
+});
+userRouter.patch('/update', (req, res, next) => {
+  res.end('更新用户');
+});
+
+// 注册路由
+app.use('/users', userRouter);
+```
+
+# 静态资源
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
